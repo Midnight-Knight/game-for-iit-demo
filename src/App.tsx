@@ -1,35 +1,50 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
+import {RESULTS} from "./configs/results.config.ts";
+import {useState} from "react";
+import type {Elements} from "./types/results.types.ts";
+import Draggable from "./components/DraggableItem/DraggableItem.tsx";
+import Dropzone from "./components/Dropzone/Dropzone.tsx";
 
 function App() {
-  const [count, setCount] = useState(0)
+    const recipe = RESULTS[0];
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    const correctElements = recipe.elements.filter((elem) => elem.isCorrect);
+
+    const [dropped, setDropped] = useState<Record<string, Elements | null>>({});
+    const [result, setResult] = useState({});
+
+    const handleDrop = (zoneId: number, item: Elements) => {
+        setDropped((prev) => ({...prev, [zoneId]: item}));
+        setResult({});
+    }
+
+    const check = () => {
+        const res: Record<string, boolean> = {};
+        for (const correctEl of correctElements) {
+            const droppedEl = dropped[correctEl.id];
+            res[correctEl.id] = droppedEl?.id === correctEl.id;
+        }
+        setResult(res);
+    }
+
+    return (
+        <div>
+            <h1>Создание {recipe.name}</h1>
+            <div>
+                <h2>Элементы</h2>
+                {recipe.elements.map((el) => (
+                    <Draggable element={el} key={el.id}/>
+                ))}
+            </div>
+            <div>
+                <h2>Зоны для создания рецептов</h2>
+                {correctElements.map((el) => (
+                    <Dropzone key={el.id} zoneId={el.id} dropped={dropped[el.id] || null} onDrop={(item) => handleDrop(el.id, item)} correct={result[el.id]}/>
+                ))}
+            </div>
+            <button onClick={check}>Проверка</button>
+        </div>
+    )
 }
 
 export default App
