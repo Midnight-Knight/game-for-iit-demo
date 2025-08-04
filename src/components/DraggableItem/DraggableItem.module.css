@@ -1,0 +1,40 @@
+.element {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: 100px;
+    cursor: grab;
+    user-select: none;
+}
+
+.image {
+    width: 72px;
+    height: 72px;
+}
+
+.background {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100px;
+    height: 100px;
+    background: #ebd4ff;
+    background: radial-gradient(circle, rgba(235, 212, 255, 1) 0%, rgba(193, 148, 233, 1) 79%);
+    border-radius: 50%;
+}
+
+.name {
+
+}
+
+@media (max-width: 800px) {
+    .background {
+        width: 72px;
+        height: 72px;
+    }
+    .image {
+        width: 56px;
+        height: 56px;
+    }
+}

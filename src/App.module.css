@@ -1,0 +1,124 @@
+.app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.containerInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  font-size: 24px;
+}
+
+.countExperiment {
+  padding-bottom: 10px;
+  align-self: end;
+}
+
+.info {
+  font-weight: bold;
+  width: 60%;
+}
+
+.dropzoneList {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-bottom: 10px;
+}
+
+.draggablezone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100px;
+  height: 100px;
+  background: #ebd4ff;
+  background: radial-gradient(circle, rgba(235, 212, 255, 1) 0%, rgba(193, 148, 233, 1) 79%);
+  opacity: 0.7;
+  border-radius: 50%;
+}
+
+.checkButton {
+  border: 1px solid white;
+  padding: 16px 32px;
+  font-size: 24px;
+  border-radius: 20px;
+  font-weight: bold;
+  background: #c782ff;
+  background: linear-gradient(56deg, rgba(199, 130, 255, 1) 0%, rgba(148, 207, 233, 1) 100%);
+}
+
+.containerDrop {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.dropzoneWrapper {
+  position: relative;
+  width: 360px;
+  height: 250px;
+  margin: 0 auto;
+}
+
+.dropzoneArc {
+  position: absolute;
+  top: 70%;
+  left: 50%;
+  transform-origin: center;
+}
+
+.flask {
+  position: absolute;
+  width: 150px;
+  bottom: -5%;
+}
+
+.miniContainerDrop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.modalInfo {
+  display: flex;
+  flex-direction: column;
+  width: 90%;
+  gap: 20px;
+}
+
+.modalInfoRecipe {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.recipeName {
+  font-weight: bold;
+}
+
+.modalImage {
+  align-self: center;
+  width: 70%;
+  height: auto;
+  border-radius: 20px;
+}
+
+@media (max-width: 800px) {
+  .draggablezone {
+    width: 72px;
+    height: 72px;
+  }
+  .mini-containerDrop {
+    font-size: 16px;
+  }
+  .info {
+    width: 80%;
+  }
+}

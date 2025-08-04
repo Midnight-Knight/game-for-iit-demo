@@ -1,0 +1,33 @@
+.delete {
+    font-size: 8px;
+    padding: 0 !important;
+    position: absolute;
+    right: -2px;
+    top: -2px;
+    background-color: #ff5f5f;
+    border-radius: 50%;
+    border: none;
+    z-index: 100;
+    width: 16px;
+    height: 16px;
+    color: black;
+} /*кнопка удаления элемента*/
+
+.dropzone {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 90px;
+    height: 90px;
+    background: #ebd4ff;
+    background: radial-gradient(circle, rgba(235, 212, 255, 1) 0%, rgba(193, 148, 233, 1) 79%);
+    border-radius: 50%;
+}
+
+@media (max-width: 800px) {
+    .dropzone {
+        width: 72px;
+        height: 72px;
+    }
+}
