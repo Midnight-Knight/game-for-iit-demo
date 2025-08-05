@@ -145,15 +145,6 @@
   background: linear-gradient(56deg, rgba(199, 130, 255, 1) 0%, rgba(148, 207, 233, 1) 100%);
 }
 
-.titleResult {
-  margin: 0 auto;
-}
-
-.result {
-  align-self: center;
-  justify-self: center;
-}
-
 @media (max-width: 800px) {
   .draggablezone {
     width: 72px;

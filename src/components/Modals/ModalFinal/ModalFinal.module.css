@@ -1,0 +1,26 @@
+.modalInfo {
+    display: flex;
+    flex-direction: column;
+    margin: 0 auto;
+    width: 90%;
+    gap: 20px;
+}
+
+.titleResult {
+    margin: 0 auto;
+}
+
+.result {
+    align-self: center;
+    justify-self: center;
+}
+
+.modalButton {
+    border: 1px solid white;
+    padding: 8px 16px;
+    font-size: 24px;
+    border-radius: 20px;
+    font-weight: bold;
+    background: #c782ff;
+    background: linear-gradient(56deg, rgba(199, 130, 255, 1) 0%, rgba(148, 207, 233, 1) 100%);
+}

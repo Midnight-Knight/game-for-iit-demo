@@ -14,38 +14,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import LiquidFlask from "./components/Flask/Flask.tsx";
 import { calculateScore } from "./utils/calculateScore";
 import { MAX_RECIPES } from "./constants/rules.ts";
+import { randomMessage } from "./utils/randomMessage.ts";
+import { mix } from "./utils/mix.ts";
+import { getVisibleCount } from "./utils/getVisibleCount.ts";
+import ModalFinal from "./components/Modals/ModalFinal/ModalFinal.tsx";
 
-
-function randomMessage(messages: string[]): string {
-    const random = Math.floor(Math.random() * messages.length);
-    return messages[random];
-}
-
-function fisherYatesShuffle<T>(array: T[]): T[] {
-    const newArray = [...array];
-    let currentIndex = newArray.length;
-
-    while (currentIndex !== 0) {
-        const randomIndex = Math.floor(Math.random() * currentIndex);
-        currentIndex--;
-
-        [newArray[currentIndex], newArray[randomIndex]] = [
-            newArray[randomIndex],
-            newArray[currentIndex],
-        ];
-    }
-
-    return newArray;
-}
-
-const getVisibleCount = () => {
-    const width = window.innerWidth;
-    if (width < 340) return 2;
-    if (width <= 500) return 3;
-    if (width <= 640) return 4;
-    if (width <= 1024) return 5;
-    return 7;
-};
 
 function App() {
     const successMessages = SUCCESS_MESSAGES;
@@ -60,22 +33,24 @@ function App() {
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const [stopTime, setStopTime] = useState(false);
     const [scorePerStep, setScorePerStep] = useState<number[]>([]);
-    const [currentTime, setCurrentTime] = useState<number>(0);
     const [isResultModalOpen, setIsResultModalOpen] = useState(false);
+    const [startTime, setStartTime] = useState<number>(Date.now());
 
     useEffect(() => {
         const count = Math.min(MAX_RECIPES, RESULTS.length);
-        const indexes = fisherYatesShuffle([...Array(RESULTS.length).keys()]).slice(0, count);
+        const indexes = mix([...Array(RESULTS.length).keys()]).slice(0, count);
         setShuffledIndexes(indexes);
         setStepIndex(0);
+        setStartTime(Date.now());
     }, []);
+
 
     const currentRecipeIndex = shuffledIndexes[stepIndex];
     const recipe = RESULTS[currentRecipeIndex];
 
     useEffect(() => {
         if (recipe) {
-            const shuffledElements = fisherYatesShuffle(recipe.elements);
+            const shuffledElements = mix(recipe.elements);
             setDragItems(shuffledElements);
             setDroppedByZone({});
             setResult({});
@@ -97,11 +72,13 @@ function App() {
 
     const correctElements = recipe.elements.filter(el => el.isCorrect);
 
+
     const handleDrop = (zoneId: number, item: Elements) => {
         setDroppedByZone(prev => ({ ...prev, [zoneId]: item }));
         setDragItems(prev => prev.map(el => (el?.id === item.id ? null : el)));
         setResult({});
     };
+
 
     const runWithBubbles = (callback: () => void) => {
         setBubbleActive(true);
@@ -111,8 +88,11 @@ function App() {
         }, 3000);
     };
 
+
     const check = () => {
+        const elapsedTime = Date.now() - startTime;
         setStopTime(true);
+
         runWithBubbles(() => {
             const res: Record<number, boolean> = {};
             const droppedElements = Object.values(droppedByZone).filter(Boolean) as Elements[];
@@ -123,7 +103,7 @@ function App() {
             const allCorrectPresent = JSON.stringify(correctIds) === JSON.stringify(droppedIds);
 
             if (allCorrectPresent) {
-                const score = calculateScore(recipe.points, currentTime);
+                const score = calculateScore(recipe.points, elapsedTime);
                 setScorePerStep(prev => [...prev, score]);
             }
 
@@ -132,18 +112,22 @@ function App() {
         });
     };
 
+
+
     const nextRecipe = () => {
         setStopTime(false);
         setIsOpen(false);
+        setStartTime(Date.now());
         if (stepIndex + 1 < shuffledIndexes.length) {
             setStepIndex(stepIndex + 1);
         } else {
             const count = Math.min(MAX_RECIPES, RESULTS.length);
-            const newIndexes = fisherYatesShuffle([...Array(RESULTS.length).keys()]).slice(0, count);
+            const newIndexes = mix([...Array(RESULTS.length).keys()]).slice(0, count);
             setShuffledIndexes(newIndexes);
             setStepIndex(0);
         }
     };
+
 
     const clearDropzone = (zoneId: number) => {
         setDroppedByZone(prev => {
@@ -167,6 +151,7 @@ function App() {
         });
     };
 
+
     return (
         <div className={s.app}>
             <Header />
@@ -175,7 +160,7 @@ function App() {
                 <div className={s.miniContainerInfo}>
                     <p className={s.info}>Подбери {correctElements.length} правильных компонента опыта и запусти реакцию</p>
                     <div className={s.time}>
-                        <Stopwatch stopTime={stopTime} onStop={setCurrentTime} />
+                        <Stopwatch stopTime={stopTime} onStop={() => {}} />
                     </div>
                 </div>
             </div>
@@ -332,25 +317,7 @@ function App() {
             <AnimatePresence>
                 {isResultModalOpen && (
                     <Modal>
-                        <motion.div
-                            initial={{ opacity: 0, y: -50 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: 50 }}
-                            transition={{ duration: 0.3 }}
-                        >
-                            <div className={s.modalInfo}>
-                                <h2 className={s.titleResult}>Результаты</h2>
-                                <p className={s.result}>{scorePerStep.reduce((sum, s) => sum + s, 0)}</p>
-                                <motion.button
-                                    onClick={() => window.location.reload()}
-                                    className={s.modalButton}
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                >
-                                    Заново
-                                </motion.button>
-                            </div>
-                        </motion.div>
+                        <ModalFinal totalScore={scorePerStep} />
                     </Modal>
                 )}
             </AnimatePresence>
