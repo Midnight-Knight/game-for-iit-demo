@@ -9,6 +9,12 @@ import Modal from "./components/Modals/Modal.tsx";
 import Header from "./components/Header/Header.tsx";
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "./configs/messages.config.ts";
 import BubbleButton from "./components/BubbleButton/BubbleButton.tsx";
+import Stopwatch from "./components/Stopwatch/Stopwatch.tsx";
+import { motion, AnimatePresence } from "framer-motion";
+import LiquidFlask from "./components/Flask/Flask.tsx";
+import { calculateScore } from "./utils/calculateScore";
+import { MAX_RECIPES } from "./constants/rules.ts";
+
 
 function randomMessage(messages: string[]): string {
     const random = Math.floor(Math.random() * messages.length);
@@ -32,8 +38,16 @@ function fisherYatesShuffle<T>(array: T[]): T[] {
     return newArray;
 }
 
+const getVisibleCount = () => {
+    const width = window.innerWidth;
+    if (width < 340) return 2;
+    if (width <= 500) return 3;
+    if (width <= 640) return 4;
+    if (width <= 1024) return 5;
+    return 7;
+};
+
 function App() {
-    const MAX_RECIPES = 5;
     const successMessages = SUCCESS_MESSAGES;
     const errorMessages = ERROR_MESSAGES;
 
@@ -44,6 +58,10 @@ function App() {
     const [droppedByZone, setDroppedByZone] = useState<Record<number, Elements | null>>({});
     const [result, setResult] = useState<{ isSuccess?: boolean } & Record<number, boolean>>({});
     const [isOpen, setIsOpen] = useState<boolean>(false);
+    const [stopTime, setStopTime] = useState(false);
+    const [scorePerStep, setScorePerStep] = useState<number[]>([]);
+    const [currentTime, setCurrentTime] = useState<number>(0);
+    const [isResultModalOpen, setIsResultModalOpen] = useState(false);
 
     useEffect(() => {
         const count = Math.min(MAX_RECIPES, RESULTS.length);
@@ -57,11 +75,23 @@ function App() {
 
     useEffect(() => {
         if (recipe) {
-            setDragItems(recipe.elements);
+            const shuffledElements = fisherYatesShuffle(recipe.elements);
+            setDragItems(shuffledElements);
             setDroppedByZone({});
             setResult({});
         }
     }, [recipe]);
+
+    const [visibleCount, setVisibleCount] = useState(getVisibleCount());
+
+    useEffect(() => {
+        const handleResize = () => {
+            setVisibleCount(getVisibleCount());
+        };
+
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
 
     if (shuffledIndexes.length === 0) return null;
 
@@ -82,6 +112,7 @@ function App() {
     };
 
     const check = () => {
+        setStopTime(true);
         runWithBubbles(() => {
             const res: Record<number, boolean> = {};
             const droppedElements = Object.values(droppedByZone).filter(Boolean) as Elements[];
@@ -91,9 +122,10 @@ function App() {
 
             const allCorrectPresent = JSON.stringify(correctIds) === JSON.stringify(droppedIds);
 
-            correctElements.forEach(el => {
-                res[el.id] = droppedIds.includes(el.id);
-            });
+            if (allCorrectPresent) {
+                const score = calculateScore(recipe.points, currentTime);
+                setScorePerStep(prev => [...prev, score]);
+            }
 
             setResult({ isSuccess: allCorrectPresent, ...res });
             setIsOpen(true);
@@ -101,11 +133,11 @@ function App() {
     };
 
     const nextRecipe = () => {
+        setStopTime(false);
         setIsOpen(false);
         if (stepIndex + 1 < shuffledIndexes.length) {
             setStepIndex(stepIndex + 1);
         } else {
-            alert("Вы прошли все рецепты!");
             const count = Math.min(MAX_RECIPES, RESULTS.length);
             const newIndexes = fisherYatesShuffle([...Array(RESULTS.length).keys()]).slice(0, count);
             setShuffledIndexes(newIndexes);
@@ -140,7 +172,12 @@ function App() {
             <Header />
             <div className={s.containerInfo}>
                 <p className={s.countExperiment}>Опыт {stepIndex + 1} из {shuffledIndexes.length}</p>
-                <p className={s.info}>Подбери {correctElements.length} правильных компонента опыта и запусти реакцию</p>
+                <div className={s.miniContainerInfo}>
+                    <p className={s.info}>Подбери {correctElements.length} правильных компонента опыта и запусти реакцию</p>
+                    <div className={s.time}>
+                        <Stopwatch stopTime={stopTime} onStop={setCurrentTime} />
+                    </div>
+                </div>
             </div>
 
             {correctElements.length >= 4 ? (
@@ -169,7 +206,7 @@ function App() {
                             );
                         })}
                     </div>
-                    <img src={"/flask.png"} alt="" className={s.flask} />
+                    <LiquidFlask flag={false}/>
                 </div>
             ) : (
                 <div className={s.miniContainerDrop}>
@@ -184,13 +221,13 @@ function App() {
                             />
                         ))}
                     </div>
-                    <img src={"/flask.png"} alt="" style={{ width: '150px' }} />
+                    <LiquidFlask flag={true}/>
                 </div>
             )}
 
             <Slider
                 items={dragItems}
-                visibleCount={3}
+                visibleCount={visibleCount}
                 renderItem={(el) => {
                     if (el === null) {
                         return <div className={s.draggablezone}></div>;
@@ -199,45 +236,125 @@ function App() {
                 }}
             />
 
-            <button
+            <motion.button
                 className={s.checkButton}
                 onClick={check}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                disabled={Object.keys(droppedByZone).length !== correctElements.length}
             >
                 Проверка
-            </button>
+            </motion.button>
 
-            {result.isSuccess !== undefined && isOpen && (
-                <Modal onClose={() => setIsOpen(false)}>
-                    <div>
-                        <div>
+            <AnimatePresence>
+                {result.isSuccess !== undefined && isOpen && (
+                    <Modal>
+                        <motion.div
+                            initial={{ opacity: 0, y: -50 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 50 }}
+                            transition={{ duration: 0.3 }}
+                        >
                             {result.isSuccess ? (
                                 <div className={s.modalInfo}>
                                     <h2>{randomMessage(successMessages)}</h2>
-                                    <div className={s.modalInfoRecipe}>
+                                    <motion.div
+                                        className={s.modalInfoRecipe}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: 0.3 }}
+                                    >
                                         <p className={s.recipeName}>{recipe.name}</p>
                                         <p>{recipe.description}</p>
-                                    </div>
+                                    </motion.div>
                                     <img src={recipe.image} alt={recipe.name} className={s.modalImage} />
+                                    {stepIndex + 1 < shuffledIndexes.length && (
+                                        <motion.button
+                                            onClick={nextRecipe}
+                                            className={s.modalButton}
+                                            whileHover={{ scale: 1.05 }}
+                                            whileTap={{ scale: 0.95 }}
+                                        >
+                                            Следующий рецепт →
+                                        </motion.button>
+                                    )}
+                                    {stepIndex + 1 === shuffledIndexes.length && (
+                                        <motion.button
+                                            onClick={() => {
+                                                setIsResultModalOpen(true);
+                                                setStopTime(true);
+                                                setIsOpen(false);
+                                            }}
+                                            className={s.modalButton}
+                                            whileHover={{ scale: 1.05 }}
+                                            whileTap={{ scale: 0.95 }}
+                                        >
+                                            Результат
+                                        </motion.button>
+                                    )}
                                 </div>
                             ) : (
                                 <div>
                                     <h2>{randomMessage(errorMessages)}</h2>
+                                    {stepIndex + 1 < shuffledIndexes.length && (
+                                        <motion.button
+                                            onClick={nextRecipe}
+                                            className={s.modalButton}
+                                            whileHover={{ scale: 1.05 }}
+                                            whileTap={{ scale: 0.95 }}
+                                        >
+                                            Следующий рецепт →
+                                        </motion.button>
+                                    )}
+                                    {stepIndex + 1 === shuffledIndexes.length && (
+                                        <motion.button
+                                            onClick={() => {
+                                                setIsResultModalOpen(true);
+                                                setStopTime(true);
+                                                setIsOpen(false);
+                                            }}
+                                            className={s.modalButton}
+                                            whileHover={{ scale: 1.05 }}
+                                            whileTap={{ scale: 0.95 }}
+                                        >
+                                            Результат
+                                        </motion.button>
+                                    )}
                                 </div>
                             )}
-                        </div>
-                        {stepIndex + 1 < shuffledIndexes.length && (
-                            <button onClick={nextRecipe}>
-                                Следующий рецепт →
-                            </button>
-                        )}
-                        {stepIndex + 1 === shuffledIndexes.length && (
-                            <button onClick={() => alert("Здесь будет финальный результат")}>
-                                Результат
-                            </button>
-                        )}
-                    </div>
-                </Modal>
-            )}
+
+                        </motion.div>
+                    </Modal>
+                )}
+            </AnimatePresence>
+
+
+            <AnimatePresence>
+                {isResultModalOpen && (
+                    <Modal>
+                        <motion.div
+                            initial={{ opacity: 0, y: -50 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 50 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            <div className={s.modalInfo}>
+                                <h2 className={s.titleResult}>Результаты</h2>
+                                <p className={s.result}>{scorePerStep.reduce((sum, s) => sum + s, 0)}</p>
+                                <motion.button
+                                    onClick={() => window.location.reload()}
+                                    className={s.modalButton}
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                >
+                                    Заново
+                                </motion.button>
+                            </div>
+                        </motion.div>
+                    </Modal>
+                )}
+            </AnimatePresence>
+
 
             <BubbleButton active={bubbleActive} />
         </div>

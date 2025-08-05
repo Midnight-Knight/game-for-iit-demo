@@ -11,6 +11,7 @@
 .image {
     width: 72px;
     height: 72px;
+    border-radius: 50%;
 }
 
 .background {
@@ -29,6 +30,9 @@
 }
 
 @media (max-width: 800px) {
+    .element {
+        width: 80px;
+    }
     .background {
         width: 72px;
         height: 72px;
@@ -36,5 +40,8 @@
     .image {
         width: 56px;
         height: 56px;
+    }
+    .name {
+        font-size: 20px;
     }
 }

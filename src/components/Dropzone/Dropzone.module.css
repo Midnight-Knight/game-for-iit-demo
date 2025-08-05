@@ -2,16 +2,20 @@
     font-size: 8px;
     padding: 0 !important;
     position: absolute;
-    right: -2px;
-    top: -2px;
-    background-color: #ff5f5f;
+    right: 2px;
+    top: 2px;
+    background-color: #ff4545;
     border-radius: 50%;
     border: none;
     z-index: 100;
     width: 16px;
     height: 16px;
-    color: black;
-} /*кнопка удаления элемента*/
+    color: #fff;
+}
+
+.delete:hover {
+    background-color: #ff8f8f;
+}
 
 .dropzone {
     position: relative;
