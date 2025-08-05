@@ -24,12 +24,6 @@ export default function CustomDragPreview() {
     };
 
     return (
-        <div style={style}>
-            {item.image ? (
-                <img src={item.image} alt={item.name} style={{ width: '100px', height: '100px', borderRadius: '50%' }} />
-            ) : (
-                <div>{item.name}</div>
-            )}
-        </div>
+        <div style={style} />
     );
 }

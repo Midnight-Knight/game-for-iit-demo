@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { RESULTS } from "./configs/results.config";
 import type { Elements } from "./types/results.types";
 import Draggable from "./components/DraggableItem/DraggableItem";
-import Dropzone from "./components/Dropzone/Dropzone";
 import Slider from "./components/Slider/Slider";
 import Modal from "./components/Modals/Modal.tsx";
 import Header from "./components/Header/Header.tsx";
@@ -11,13 +10,13 @@ import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "./configs/messages.config.ts";
 import BubbleButton from "./components/BubbleButton/BubbleButton.tsx";
 import Stopwatch from "./components/Stopwatch/Stopwatch.tsx";
 import { motion, AnimatePresence } from "framer-motion";
-import LiquidFlask from "./components/Flask/Flask.tsx";
 import { calculateScore } from "./utils/calculateScore";
 import { MAX_RECIPES } from "./constants/rules.ts";
 import { randomMessage } from "./utils/randomMessage.ts";
 import { mix } from "./utils/mix.ts";
 import { getVisibleCount } from "./utils/getVisibleCount.ts";
 import ModalFinal from "./components/Modals/ModalFinal/ModalFinal.tsx";
+import DropzoneLayout from "./components/DropzoneLayout/DropzoneLayout.tsx";
 
 
 function App() {
@@ -165,50 +164,7 @@ function App() {
                 </div>
             </div>
 
-            {correctElements.length >= 4 ? (
-                <div className={s.containerDrop}>
-                    <div className={s.dropzoneWrapper}>
-                        {correctElements.map((el, index) => {
-                            const total = correctElements.length;
-                            const radius = correctElements.length >= 5 ? 140 : 120;
-                            const angle = (index / (total - 1)) * Math.PI;
-                            const x = Math.cos(angle - Math.PI) * radius;
-                            const y = Math.sin(angle - Math.PI) * radius;
-
-                            return (
-                                <div
-                                    key={el.id}
-                                    className={s.dropzoneArc}
-                                    style={{ transform: `translate(-50%, -50%) translate(${x}px, ${y}px)` }}
-                                >
-                                    <Dropzone
-                                        zoneId={el.id}
-                                        dropped={droppedByZone[el.id] || null}
-                                        onDrop={(item) => handleDrop(el.id, item)}
-                                        onClear={() => clearDropzone(el.id)}
-                                    />
-                                </div>
-                            );
-                        })}
-                    </div>
-                    <LiquidFlask flag={false}/>
-                </div>
-            ) : (
-                <div className={s.miniContainerDrop}>
-                    <div className={s.dropzoneList}>
-                        {correctElements.map(el => (
-                            <Dropzone
-                                key={el.id}
-                                zoneId={el.id}
-                                dropped={droppedByZone[el.id] || null}
-                                onDrop={(item) => handleDrop(el.id, item)}
-                                onClear={() => clearDropzone(el.id)}
-                            />
-                        ))}
-                    </div>
-                    <LiquidFlask flag={true}/>
-                </div>
-            )}
+            <DropzoneLayout correctElements={correctElements} droppedByZone={droppedByZone} onDrop={handleDrop} onClear={clearDropzone} />
 
             <Slider
                 items={dragItems}
@@ -240,78 +196,56 @@ function App() {
                             exit={{ opacity: 0, y: 50 }}
                             transition={{ duration: 0.3 }}
                         >
-                            {result.isSuccess ? (
-                                <div className={s.modalInfo}>
-                                    <h2>{randomMessage(successMessages)}</h2>
-                                    <motion.div
-                                        className={s.modalInfoRecipe}
-                                        initial={{ opacity: 0, y: 20 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: 0.3 }}
-                                    >
-                                        <p className={s.recipeName}>{recipe.name}</p>
-                                        <p>{recipe.description}</p>
-                                    </motion.div>
-                                    <img src={recipe.image} alt={recipe.name} className={s.modalImage} />
-                                    {stepIndex + 1 < shuffledIndexes.length && (
-                                        <motion.button
-                                            onClick={nextRecipe}
-                                            className={s.modalButton}
-                                            whileHover={{ scale: 1.05 }}
-                                            whileTap={{ scale: 0.95 }}
-                                        >
-                                            Следующий рецепт →
-                                        </motion.button>
-                                    )}
-                                    {stepIndex + 1 === shuffledIndexes.length && (
-                                        <motion.button
-                                            onClick={() => {
-                                                setIsResultModalOpen(true);
-                                                setStopTime(true);
-                                                setIsOpen(false);
-                                            }}
-                                            className={s.modalButton}
-                                            whileHover={{ scale: 1.05 }}
-                                            whileTap={{ scale: 0.95 }}
-                                        >
-                                            Результат
-                                        </motion.button>
-                                    )}
-                                </div>
-                            ) : (
-                                <div>
-                                    <h2>{randomMessage(errorMessages)}</h2>
-                                    {stepIndex + 1 < shuffledIndexes.length && (
-                                        <motion.button
-                                            onClick={nextRecipe}
-                                            className={s.modalButton}
-                                            whileHover={{ scale: 1.05 }}
-                                            whileTap={{ scale: 0.95 }}
-                                        >
-                                            Следующий рецепт →
-                                        </motion.button>
-                                    )}
-                                    {stepIndex + 1 === shuffledIndexes.length && (
-                                        <motion.button
-                                            onClick={() => {
-                                                setIsResultModalOpen(true);
-                                                setStopTime(true);
-                                                setIsOpen(false);
-                                            }}
-                                            className={s.modalButton}
-                                            whileHover={{ scale: 1.05 }}
-                                            whileTap={{ scale: 0.95 }}
-                                        >
-                                            Результат
-                                        </motion.button>
-                                    )}
-                                </div>
-                            )}
+                            <div className={s.modalInfo}>
+                                <h2>
+                                    {result.isSuccess
+                                        ? randomMessage(successMessages)
+                                        : randomMessage(errorMessages)}
+                                </h2>
 
+                                {result.isSuccess && (
+                                    <>
+                                        <motion.div
+                                            className={s.modalInfoRecipe}
+                                            initial={{ opacity: 0, y: 20 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: 0.3 }}
+                                        >
+                                            <p className={s.recipeName}>{recipe.name}</p>
+                                            <p>{recipe.description}</p>
+                                        </motion.div>
+                                        <img
+                                            src={recipe.image}
+                                            alt={recipe.name}
+                                            className={s.modalImage}
+                                        />
+                                    </>
+                                )}
+
+                                <motion.button
+                                    onClick={
+                                        stepIndex + 1 < shuffledIndexes.length
+                                            ? nextRecipe
+                                            : () => {
+                                                setIsResultModalOpen(true);
+                                                setStopTime(true);
+                                                setIsOpen(false);
+                                            }
+                                    }
+                                    className={s.modalButton}
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                >
+                                    {stepIndex + 1 < shuffledIndexes.length
+                                        ? "Следующий рецепт →"
+                                        : "Результат"}
+                                </motion.button>
+                            </div>
                         </motion.div>
                     </Modal>
                 )}
             </AnimatePresence>
+
 
 
             <AnimatePresence>

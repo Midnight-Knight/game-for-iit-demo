@@ -1,0 +1,41 @@
+.containerDrop {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+.dropzoneWrapper {
+    position: relative;
+    width: 360px;
+    height: 250px;
+    margin: 0 auto;
+}
+
+.dropzoneArc {
+    position: absolute;
+    top: 70%;
+    left: 50%;
+    transform-origin: center;
+}
+
+.miniContainerDrop {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.dropzoneList {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-bottom: 10px;
+}
+
+@media (max-width: 800px) {
+    .miniContainerDrop {
+        font-size: 16px;
+    }
+}

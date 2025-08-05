@@ -39,13 +39,6 @@
   width: 60%;
 }
 
-.dropzoneList {
-  display: flex;
-  justify-content: center;
-  gap: 40px;
-  margin-bottom: 10px;
-}
-
 .draggablezone {
   display: flex;
   align-items: center;
@@ -74,39 +67,10 @@
   pointer-events: none;
 }
 
-.containerDrop {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 40px;
-}
-
-.dropzoneWrapper {
-  position: relative;
-  width: 360px;
-  height: 250px;
-  margin: 0 auto;
-}
-
-.dropzoneArc {
-  position: absolute;
-  top: 70%;
-  left: 50%;
-  transform-origin: center;
-}
-
 .flask {
   position: absolute;
   width: 150px;
   bottom: -5%;
-}
-
-.miniContainerDrop {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 10px;
 }
 
 .modalInfo {
@@ -149,9 +113,6 @@
   .draggablezone {
     width: 72px;
     height: 72px;
-  }
-  .minicontainerDrop {
-    font-size: 16px;
   }
   .info {
     width: 80%;
