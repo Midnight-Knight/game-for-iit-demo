@@ -34,6 +34,7 @@ function App() {
     const [scorePerStep, setScorePerStep] = useState<number[]>([]);
     const [isResultModalOpen, setIsResultModalOpen] = useState(false);
     const [startTime, setStartTime] = useState<number>(Date.now());
+    const [initialShuffled, setInitialShuffled] = useState<Elements[]>([]);
 
     useEffect(() => {
         const count = Math.min(MAX_RECIPES, RESULTS.length);
@@ -50,11 +51,13 @@ function App() {
     useEffect(() => {
         if (recipe) {
             const shuffledElements = mix(recipe.elements);
+            setInitialShuffled(shuffledElements)
             setDragItems(shuffledElements);
             setDroppedByZone({});
             setResult({});
         }
     }, [recipe]);
+
 
     const [visibleCount, setVisibleCount] = useState(getVisibleCount());
 
@@ -136,7 +139,7 @@ function App() {
             if (removedElement) {
                 setDragItems(prevDragItems => {
                     const newDragItems = [...prevDragItems];
-                    const originalIndex = recipe.elements.findIndex(el => el.id === removedElement.id);
+                    const originalIndex = initialShuffled.findIndex(el => el.id === removedElement.id);
                     if (originalIndex !== -1) {
                         newDragItems[originalIndex] = removedElement;
                     } else {

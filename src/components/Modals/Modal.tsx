@@ -1,6 +1,6 @@
 import s from "./Modal.module.css";
 //@ts-ignore
-import { ReactNode } from "react";
+import {ReactNode, useEffect} from "react";
 
 
 type Props = {
@@ -8,6 +8,14 @@ type Props = {
 }
 
 export default function Modal({children}: Props) {
+    useEffect(() => {
+        document.body.style.overflow = "hidden";
+
+        return () => {
+            document.body.style.overflow = "";
+        };
+    }, []);
+
     return (
         <div className={s.modalOverlay}>
             <div className={s.modal} onClick={(e) => e.stopPropagation()}>

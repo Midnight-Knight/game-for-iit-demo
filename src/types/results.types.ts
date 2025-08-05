@@ -12,4 +12,5 @@ export type Elements = {
     name: string,
     image: string,
     isCorrect: boolean,
+    rounding: boolean,
 }

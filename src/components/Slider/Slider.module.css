@@ -25,6 +25,7 @@
 
 .list {
     display: flex;
+    min-height: 105px;
     gap: 40px;
 }
 

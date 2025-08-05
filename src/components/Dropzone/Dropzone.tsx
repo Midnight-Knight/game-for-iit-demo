@@ -43,7 +43,7 @@ export default function Dropzone({ dropped, onDrop, onClear }: DropzoneProps) {
                     >
                         ✕
                     </button>
-                    <img src={dropped.image} alt={dropped.name} width={56} height={56} style={{borderRadius: "50%"}}/>
+                    <img src={dropped.image} alt={dropped.name} width={56} height={56} style={{borderRadius: dropped.rounding ? "50%" : ""}}/>
                 </>
             ) : null}
         </motion.div>

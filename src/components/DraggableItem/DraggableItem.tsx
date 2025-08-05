@@ -25,7 +25,7 @@ export default function Draggable({ element }: DraggableProps) {
             ref={dragRef}
         >
             <div className={s.background}>
-                <img src={element.image} alt={element.name} className={s.image} />
+                <img src={element.image} alt={element.name} className={s.image} style={{ borderRadius: element.rounding ? "50%" : "0" }} />
             </div>
             <p className={s.name}>{element.name}</p>
         </div>
