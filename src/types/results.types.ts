@@ -3,6 +3,7 @@ export type Results = {
     points: number,
     name: string,
     image: string,
+    drawing: string,
     description: string,
     elements: Elements[],
 }
