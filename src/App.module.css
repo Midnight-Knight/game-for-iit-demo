@@ -44,10 +44,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100px;
-  height: 100px;
-  background: #ebd4ff;
-  background: radial-gradient(circle, rgba(235, 212, 255, 1) 0%, rgba(193, 148, 233, 1) 79%);
+  width: 150px;
+  height: 150px;
+  background: #ffffff;
+  background: radial-gradient(circle, rgba(255, 255, 255, 1) 0%, rgba(182, 217, 252, 1) 100%);
   opacity: 0.7;
   border-radius: 50%;
 }
@@ -58,8 +58,8 @@
   font-size: 24px;
   border-radius: 20px;
   font-weight: bold;
-  background: #c782ff;
-  background: linear-gradient(56deg, rgba(199, 130, 255, 1) 0%, rgba(148, 207, 233, 1) 100%);
+  background: #ffffff;
+  background: radial-gradient(circle, rgba(255, 255, 255, 1) 0%, rgba(182, 217, 252, 1) 100%);
 }
 
 .checkButton:disabled {
@@ -106,8 +106,7 @@
   font-size: 24px;
   border-radius: 20px;
   font-weight: bold;
-  background: #c782ff;
-  background: linear-gradient(56deg, rgba(199, 130, 255, 1) 0%, rgba(148, 207, 233, 1) 100%);
+  background: #9f9f9f;
 }
 
 @media (max-width: 800px) {

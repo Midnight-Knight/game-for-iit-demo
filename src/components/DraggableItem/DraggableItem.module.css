@@ -3,29 +3,29 @@
     flex-direction: column;
     align-items: center;
     gap: 8px;
-    width: 100px;
+    width: 150px;
     cursor: grab;
     user-select: none;
 }
 
 .image {
-    width: 72px;
-    height: 72px;
+    width: 120px;
+    height: 120px;
 }
 
 .background {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 100px;
-    height: 100px;
-    background: #ebd4ff;
-    background: radial-gradient(circle, rgba(235, 212, 255, 1) 0%, rgba(193, 148, 233, 1) 79%);
+    width: 150px;
+    height: 150px;
+    background: #ffffff;
+    background: radial-gradient(circle, rgba(255, 255, 255, 1) 0%, rgba(182, 217, 252, 1) 100%);
     border-radius: 50%;
 }
 
 .name {
-
+    text-align: center;
 }
 
 @media (max-width: 800px) {
@@ -33,12 +33,12 @@
         width: 80px;
     }
     .background {
-        width: 72px;
-        height: 72px;
+        width: 100px;
+        height: 100px;
     }
     .image {
-        width: 56px;
-        height: 56px;
+        width: 72px;
+        height: 72px;
     }
     .name {
         font-size: 20px;

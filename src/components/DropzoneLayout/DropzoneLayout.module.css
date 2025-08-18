@@ -1,41 +1,60 @@
-.containerDrop {
-    position: relative;
+.container {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    margin-bottom: 40px;
-}
-
-.dropzoneWrapper {
-    position: relative;
-    width: 360px;
-    height: 250px;
-    margin: 0 auto;
-}
-
-.dropzoneArc {
-    position: absolute;
-    top: 70%;
-    left: 50%;
-    transform-origin: center;
-}
-
-.miniContainerDrop {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-bottom: 10px;
-}
-
-.dropzoneList {
-    display: flex;
     justify-content: center;
+    gap: 10px;
+    flex-direction: column;
+}
+
+.listContainer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.arrowWrapper {
+    width: 32px;
+}
+
+.button {
+    cursor: pointer;
+    height: 72px;
+    display: block;
+    border-radius: 16px;
+    padding: 4px;
+    transition: background-color 0.3s, opacity 0.3s;
+}
+
+.button:hover {
+    background-color: rgba(255, 255, 255, 0.07);
+    opacity: 0.8;
+}
+
+.list {
+    display: flex;
+    min-height: 105px;
     gap: 40px;
-    margin-bottom: 10px;
+}
+
+.itemWrapper {
+    flex-shrink: 0;
+}
+
+.drawing {
+    width: 600px;
+    height: auto;
+    border-radius: 50px;
+    margin-top: 20px;
 }
 
 @media (max-width: 800px) {
-    .miniContainerDrop {
-        font-size: 16px;
+    .list {
+        gap: 10px;
+    }
+    .button {
+        height: 48px;
+    }
+    .drawing {
+        width: 100%;
     }
 }

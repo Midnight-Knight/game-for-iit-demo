@@ -7,24 +7,36 @@ import Slider from "./components/Slider/Slider";
 import Modal from "./components/Modals/Modal.tsx";
 import Header from "./components/Header/Header.tsx";
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "./configs/messages.config.ts";
-import BubbleButton from "./components/BubbleButton/BubbleButton.tsx";
 import Stopwatch from "./components/Stopwatch/Stopwatch.tsx";
 import { motion, AnimatePresence } from "framer-motion";
 import { calculateScore } from "./utils/calculateScore";
-import { MAX_RECIPES } from "./constants/rules.ts";
 import { randomMessage } from "./utils/randomMessage.ts";
 import { mix } from "./utils/mix.ts";
 import { getVisibleCount } from "./utils/getVisibleCount.ts";
 import ModalFinal from "./components/Modals/ModalFinal/ModalFinal.tsx";
-import DropzoneLayout from "./components/DropzoneLayout/DropzoneLayout.tsx";
+import Gears from "./components/Gears/Gears.tsx";
+import DropzoneSlider from "./components/DropzoneLayout/DropzoneLayout.tsx";
+
+type Recipe = {
+    id: number;
+    level: number;
+    class: number[];
+    points: number;
+    name: string;
+    description: string;
+    image: string;
+    drawing: string;
+    elements: Elements[];
+    dependsOn: number[];
+    completed: boolean;
+};
 
 
 function App() {
     const successMessages = SUCCESS_MESSAGES;
     const errorMessages = ERROR_MESSAGES;
 
-    const [bubbleActive, setBubbleActive] = useState(false);
-    const [shuffledIndexes, setShuffledIndexes] = useState<number[]>([]);
+    const [play, setPlay] = useState(false);
     const [stepIndex, setStepIndex] = useState(0);
     const [dragItems, setDragItems] = useState<(Elements | null)[]>([]);
     const [droppedByZone, setDroppedByZone] = useState<Record<number, Elements | null>>({});
@@ -36,43 +48,72 @@ function App() {
     const [startTime, setStartTime] = useState<number>(Date.now());
     const [initialShuffled, setInitialShuffled] = useState<Elements[]>([]);
 
+    const [availableRecipes, setAvailableRecipes] = useState<typeof RESULTS>([]);
+    const [completedRecipesIds, setCompletedRecipesIds] = useState<number[]>([]);
+    const [visibleCount, setVisibleCount] = useState(getVisibleCount());
+
+    function canUnlockRecipe(
+        recipe: Recipe,
+        completed: number[],
+        allRecipes: Recipe[]
+    ): boolean {
+        const depsOk = recipe.dependsOn.every(id => completed.includes(id));
+
+        if (!recipe.class || recipe.class.length === 0) return depsOk;
+
+        const cls = Math.min(...recipe.class);
+        const lvl = recipe.level;
+
+        const prevLevels = allRecipes.filter(
+            r => r.class?.includes(cls) && r.level < lvl
+        );
+
+        const prevDone = prevLevels.every(r => completed.includes(r.id));
+
+        return depsOk && prevDone;
+    }
+
     useEffect(() => {
-        const count = Math.min(MAX_RECIPES, RESULTS.length);
-        const indexes = mix([...Array(RESULTS.length).keys()]).slice(0, count);
-        setShuffledIndexes(indexes);
-        setStepIndex(0);
-        setStartTime(Date.now());
-    }, []);
+        const filtered = RESULTS.filter(r =>
+            //@ts-ignore
+            canUnlockRecipe(r, completedRecipesIds, RESULTS)
+        );
+
+        const sorted = filtered.sort((a, b) => {
+            const classA = Math.min(...a.class);
+            const classB = Math.min(...b.class);
+
+            if (classA !== classB) return classA - classB;
+            return a.level - b.level;
+        });
 
 
-    const currentRecipeIndex = shuffledIndexes[stepIndex];
-    const recipe = RESULTS[currentRecipeIndex];
+        setAvailableRecipes(sorted);
+
+        if (stepIndex >= sorted.length) setStepIndex(0);
+    }, [completedRecipesIds]);
+
+    const recipe = availableRecipes[stepIndex];
+    const correctElements = recipe?.elements.filter(el => el.isCorrect) || [];
 
     useEffect(() => {
         if (recipe) {
             const shuffledElements = mix(recipe.elements);
-            setInitialShuffled(shuffledElements)
+            setInitialShuffled(shuffledElements);
             setDragItems(shuffledElements);
             setDroppedByZone({});
             setResult({});
+            setStartTime(Date.now());
+            setStopTime(false);
         }
     }, [recipe]);
 
-
-    const [visibleCount, setVisibleCount] = useState(getVisibleCount());
-
     useEffect(() => {
-        const handleResize = () => {
-            setVisibleCount(getVisibleCount());
-        };
-
+        const handleResize = () => setVisibleCount(getVisibleCount());
         window.addEventListener("resize", handleResize);
         return () => window.removeEventListener("resize", handleResize);
     }, []);
 
-    if (shuffledIndexes.length === 0) return null;
-
-    const correctElements = recipe.elements.filter(el => el.isCorrect);
 
 
     const handleDrop = (zoneId: number, item: Elements) => {
@@ -81,70 +122,18 @@ function App() {
         setResult({});
     };
 
-
-    const runWithBubbles = (callback: () => void) => {
-        setBubbleActive(true);
-        setTimeout(() => {
-            callback();
-            setBubbleActive(false);
-        }, 3000);
-    };
-
-
-    const check = () => {
-        const elapsedTime = Date.now() - startTime;
-        setStopTime(true);
-
-        runWithBubbles(() => {
-            const res: Record<number, boolean> = {};
-            const droppedElements = Object.values(droppedByZone).filter(Boolean) as Elements[];
-
-            const correctIds = correctElements.map(e => e.id).sort((a, b) => a - b);
-            const droppedIds = droppedElements.map(e => e.id).sort((a, b) => a - b);
-
-            const allCorrectPresent = JSON.stringify(correctIds) === JSON.stringify(droppedIds);
-
-            if (allCorrectPresent) {
-                const score = calculateScore(recipe.points, elapsedTime);
-                setScorePerStep(prev => [...prev, score]);
-            }
-
-            setResult({ isSuccess: allCorrectPresent, ...res });
-            setIsOpen(true);
-        });
-    };
-
-
-
-    const nextRecipe = () => {
-        setStopTime(false);
-        setIsOpen(false);
-        setStartTime(Date.now());
-        if (stepIndex + 1 < shuffledIndexes.length) {
-            setStepIndex(stepIndex + 1);
-        } else {
-            const count = Math.min(MAX_RECIPES, RESULTS.length);
-            const newIndexes = mix([...Array(RESULTS.length).keys()]).slice(0, count);
-            setShuffledIndexes(newIndexes);
-            setStepIndex(0);
-        }
-    };
-
-
     const clearDropzone = (zoneId: number) => {
         setDroppedByZone(prev => {
             const newDropped = { ...prev };
             const removedElement = newDropped[zoneId];
             delete newDropped[zoneId];
+
             if (removedElement) {
                 setDragItems(prevDragItems => {
                     const newDragItems = [...prevDragItems];
                     const originalIndex = initialShuffled.findIndex(el => el.id === removedElement.id);
-                    if (originalIndex !== -1) {
-                        newDragItems[originalIndex] = removedElement;
-                    } else {
-                        newDragItems.push(removedElement);
-                    }
+                    if (originalIndex !== -1) newDragItems[originalIndex] = removedElement;
+                    else newDragItems.push(removedElement);
                     return newDragItems;
                 });
             }
@@ -153,31 +142,73 @@ function App() {
         });
     };
 
+    const check = () => {
+        const elapsedTime = Date.now() - startTime;
+        setStopTime(true);
+
+        setPlay(true);
+
+        setTimeout(() => {
+            const droppedElements = Object.values(droppedByZone).filter(Boolean) as Elements[];
+            const correctIds = correctElements.map(e => e.id).sort((a, b) => a - b);
+            const droppedIds = droppedElements.map(e => e.id).sort((a, b) => a - b);
+
+            const allCorrectPresent = JSON.stringify(correctIds) === JSON.stringify(droppedIds);
+
+            setResult({ isSuccess: allCorrectPresent });
+            setIsOpen(true);
+
+            if (allCorrectPresent) {
+                const score = calculateScore(recipe.points!, elapsedTime);
+                setScorePerStep(prev => [...prev, score]);
+
+                setCompletedRecipesIds(prev =>
+                    prev.includes(recipe.id) ? prev : [...prev, recipe.id]
+                );
+            }
+
+            setPlay(false);
+        }, 3000);
+    };
+
+
+    const nextRecipe = () => {
+        setStopTime(false);
+        setIsOpen(false);
+        setStartTime(Date.now());
+
+        if (stepIndex + 1 < availableRecipes.length) setStepIndex(stepIndex + 1);
+        else setIsResultModalOpen(true);
+    };
+
+    if (!recipe) return <div>Нет доступных рецептов</div>;
 
     return (
         <div className={s.app}>
             <Header />
+
             <div className={s.containerInfo}>
-                <p className={s.countExperiment}>Опыт {stepIndex + 1} из {shuffledIndexes.length}</p>
                 <div className={s.miniContainerInfo}>
-                    <p className={s.info}>Подбери {correctElements.length} правильных компонента опыта и запусти реакцию</p>
+                    <p className={s.info}>Подбери {correctElements.length} правильных компонента и запусти создание</p>
                     <div className={s.time}>
                         <Stopwatch stopTime={stopTime} onStop={() => {}} />
                     </div>
                 </div>
             </div>
 
-            <DropzoneLayout correctElements={correctElements} droppedByZone={droppedByZone} onDrop={handleDrop} onClear={clearDropzone} />
+            <DropzoneSlider
+                correctElements={correctElements}
+                droppedByZone={droppedByZone}
+                onDrop={handleDrop}
+                onClear={clearDropzone}
+                drawing={recipe.drawing}
+                visibleCount={3}
+            />
 
             <Slider
                 items={dragItems}
                 visibleCount={visibleCount}
-                renderItem={(el) => {
-                    if (el === null) {
-                        return <div className={s.draggablezone}></div>;
-                    }
-                    return <Draggable element={el} />;
-                }}
+                renderItem={(el) => el ? <Draggable element={el} /> : <div className={s.draggablezone}></div>}
             />
 
             <motion.button
@@ -192,75 +223,48 @@ function App() {
 
             <AnimatePresence>
                 {result.isSuccess !== undefined && isOpen && (
-                    <Modal>
-                        <motion.div
-                            initial={{ opacity: 0, y: -50 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: 50 }}
-                            transition={{ duration: 0.3 }}
-                        >
+                    <Modal onClose={() => setIsOpen(false)}>
+                        <motion.div initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 50 }} transition={{ duration: 0.3 }}>
                             <div className={s.modalInfo}>
-                                <h2>
-                                    {result.isSuccess
-                                        ? randomMessage(successMessages)
-                                        : randomMessage(errorMessages)}
-                                </h2>
+                                <h2>{result.isSuccess ? randomMessage(successMessages) : randomMessage(errorMessages)}</h2>
 
                                 {result.isSuccess && (
                                     <>
-                                        <motion.div
-                                            className={s.modalInfoRecipe}
-                                            initial={{ opacity: 0, y: 20 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            transition={{ delay: 0.3 }}
-                                        >
+                                        <motion.div className={s.modalInfoRecipe} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
                                             <p className={s.recipeName}>{recipe.name}</p>
                                             <p>{recipe.description}</p>
                                         </motion.div>
-                                        <img
-                                            src={recipe.image}
-                                            alt={recipe.name}
-                                            className={s.modalImage}
-                                        />
+                                        <img src={recipe.image} alt={recipe.name} className={s.modalImage} />
                                     </>
                                 )}
 
                                 <motion.button
-                                    onClick={
-                                        stepIndex + 1 < shuffledIndexes.length
-                                            ? nextRecipe
-                                            : () => {
-                                                setIsResultModalOpen(true);
-                                                setStopTime(true);
-                                                setIsOpen(false);
-                                            }
-                                    }
+                                    onClick={() => {
+                                        if (result.isSuccess) nextRecipe();
+                                    }}
                                     className={s.modalButton}
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
+                                    disabled={!result.isSuccess}
                                 >
-                                    {stepIndex + 1 < shuffledIndexes.length
-                                        ? "Следующий рецепт →"
-                                        : "Результат"}
+                                    {stepIndex + 1 < availableRecipes.length ? "Попытаться ещё раз" : "Результат"}
                                 </motion.button>
+
                             </div>
                         </motion.div>
                     </Modal>
                 )}
             </AnimatePresence>
 
-
-
             <AnimatePresence>
                 {isResultModalOpen && (
-                    <Modal>
+                    <Modal onClose={() => setIsOpen(true)}>
                         <ModalFinal totalScore={scorePerStep} />
                     </Modal>
                 )}
             </AnimatePresence>
 
-
-            <BubbleButton active={bubbleActive} />
+            <Gears play={play} />
         </div>
     );
 }
