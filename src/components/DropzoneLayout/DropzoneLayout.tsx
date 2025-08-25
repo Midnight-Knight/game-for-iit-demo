@@ -16,19 +16,17 @@ export default function DropzoneLayout({
                                            onClear,
                                        }: DropzoneLayoutProps) {
     return (
-        <div className={s.container}>
-            <div className={s.list}>
-                {correctElements.map((el) => (
-                    <div key={el.id} className={s.item}>
-                        <Dropzone
-                            zoneId={el.id}
-                            dropped={droppedByZone[el.id] || null}
-                            onDrop={(item) => onDrop(el.id, item)}
-                            onClear={() => onClear(el.id)}
-                        />
-                    </div>
-                ))}
-            </div>
+        <div className={s.list}>
+            {correctElements.map((el) => (
+                <div key={el.id} className={s.item}>
+                    <Dropzone
+                        zoneId={el.id}
+                        dropped={droppedByZone[el.id] || null}
+                        onDrop={(item) => onDrop(el.id, item)}
+                        onClear={() => onClear(el.id)}
+                    />
+                </div>
+            ))}
         </div>
     );
 }

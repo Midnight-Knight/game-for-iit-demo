@@ -12,6 +12,7 @@ import { mix } from "./utils/mix.ts";
 import Gears from "./components/Gears/Gears.tsx";
 import DropzoneSlider from "./components/DropzoneLayout/DropzoneLayout.tsx";
 import DEFAULT_CHERTEZH from "/default_chertezh.jpg";
+import { useIsSmallScreen } from "./hooks/useIsSmallScreen.tsx";
 import {
     flip,
     offset,
@@ -43,6 +44,7 @@ function App() {
     const [completedRecipesIds, setCompletedRecipesIds] = useState<number[]>([]);
     const [discoveredRecipes, setDiscoveredRecipes] = useState<Recipe[]>([]);
     const [isDiscoveredModalOpen, setIsDiscoveredModalOpen] = useState(false);
+    const isSmallScreen = useIsSmallScreen();
 
     function DiscoveredItem({ recipe }: { recipe: Recipe }) {
         const [open, setOpen] = useState(false);
@@ -56,7 +58,6 @@ function App() {
         const hover = useHover(context);
         const role = useRole(context, { role: "tooltip" });
         const interactions = useInteractions([hover, role]);
-
         return (
             <div>
                 <div ref={reference} {...interactions.getReferenceProps()} className={s.discoveredItem}>
@@ -227,18 +228,35 @@ function App() {
                 <div className={s.containerInfo}>
                     <div className={s.miniContainerInfo}>
                         <p className={s.info}>Подбери {correctElements.length} правильных компонента и запусти создание изобретения</p>
+                        {!isSmallScreen &&
+                            <div className={s.containerDrop}>
+                                <DropzoneSlider
+                                    correctElements={correctElements}
+                                    droppedByZone={droppedByZone}
+                                    onDrop={handleDrop}
+                                    onClear={clearDropzone}
+                                />
+                            </div>
+                        }
+                        <div className={s.counter}>
+                            <p>Успешных попыток:</p>
+                            <p>{countTrue}</p>
+                            <p>Неудачных попыток:</p>
+                            <p>{countFalse}</p>
+                        </div>
+                    </div>
+                </div>
+
+                {isSmallScreen &&
+                    <div className={s.containerDrop}>
                         <DropzoneSlider
                             correctElements={correctElements}
                             droppedByZone={droppedByZone}
                             onDrop={handleDrop}
                             onClear={clearDropzone}
                         />
-                        <div className={s.counter}>
-                            <p>Успешных попыток:{countTrue}</p>
-                            <p>Неудачных попыток:{countFalse}</p>
-                        </div>
                     </div>
-                </div>
+                }
 
                 <img src={DEFAULT_CHERTEZH} alt={"CHERTEZH"} className={s.drawing} />
 
