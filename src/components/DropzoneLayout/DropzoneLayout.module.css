@@ -32,29 +32,39 @@
 
 .list {
     display: flex;
-    min-height: 105px;
-    gap: 40px;
+    max-width: 1000px;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-content: center;
+    gap: 20px;
+    min-height: 220px;
 }
 
-.itemWrapper {
-    flex-shrink: 0;
-}
-
-.drawing {
-    width: 600px;
-    height: auto;
-    border-radius: 50px;
-    margin-top: 20px;
+.item {
+    width: 200px;
+    margin: 0;
+    justify-content: center;
+    justify-self: center;
 }
 
 @media (max-width: 800px) {
     .list {
+        width: 100%;
         gap: 10px;
+    }
+    .item {
+        width: 150px;
     }
     .button {
         height: 48px;
     }
-    .drawing {
-        width: 100%;
+}
+
+@media (max-width: 380px) {
+    .item {
+        width: 120px;
+    }
+    .button {
+        height: 48px;
     }
 }

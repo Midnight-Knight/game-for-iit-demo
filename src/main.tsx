@@ -17,7 +17,11 @@ const HTML5toTouch = {
         },
         {
             backend: TouchBackend,
-            options: { enableMouseEvents: true },
+            options: {
+                enableMouseEvents: true,
+                enableAutoScroll: true,
+                scrollContainer: window,
+            },
             preview: true,
             transition: TouchTransition,
         },

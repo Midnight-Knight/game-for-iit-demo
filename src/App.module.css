@@ -2,7 +2,21 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 40px;
+  padding-bottom: 60px;
+}
+
+.drawing {
+  width: 600px;
+  height: auto;
+  border-radius: 50px;
+}
+
+.counter {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 260px;
 }
 
 .containerInfo {
@@ -21,14 +35,6 @@
   justify-content: space-between;
 }
 
-.time {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  max-width: 100px;
-  width: 100%;
-}
-
 .countExperiment {
   padding-bottom: 10px;
   align-self: end;
@@ -38,6 +44,11 @@
   font-weight: bold;
   width: 60%;
   max-width: 400px;
+}
+
+.draggablezoneContainer {
+  justify-items: center;
+  width: 200px;
 }
 
 .draggablezone {
@@ -52,26 +63,36 @@
   border-radius: 50%;
 }
 
+
+.list {
+  display: flex;
+  max-width: 1000px;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-content: center;
+  gap: 20px;
+  min-height: 220px;
+}
+
+.item {
+  margin: 0;
+  justify-content: center;
+  justify-self: center;
+}
+
 .checkButton {
   border: 1px solid white;
   padding: 16px 32px;
   font-size: 24px;
   border-radius: 20px;
   font-weight: bold;
-  background: #ffffff;
-  background: radial-gradient(circle, rgba(255, 255, 255, 1) 0%, rgba(182, 217, 252, 1) 100%);
+  background: #5e9ac2;
 }
 
 .checkButton:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   pointer-events: none;
-}
-
-.flask {
-  position: absolute;
-  width: 150px;
-  bottom: -5%;
 }
 
 .modalInfo {
@@ -82,6 +103,10 @@
   gap: 20px;
 }
 
+.modalMessage {
+  margin: 0;
+}
+
 .modalInfoRecipe {
   display: flex;
   flex-direction: column;
@@ -89,38 +114,126 @@
 }
 
 .recipeName {
+  align-self: center;
   font-weight: bold;
+  font-size: 48px;
 }
 
 .modalImage {
   align-self: center;
-  width: 70%;
+  width: 90%;
   height: auto;
   border-radius: 20px;
   margin-bottom: 20px;
 }
 
 .modalButton {
+  margin: 0 auto;
   border: 1px solid white;
-  padding: 8px 16px;
+  padding: 16px;
   font-size: 24px;
   border-radius: 20px;
   font-weight: bold;
   background: #9f9f9f;
+  width: 80%;
 }
 
+.headerRes {
+  align-self: center;
+  font-size: 36px;
+}
+
+.containerRes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 26px;
+  padding-bottom: 24px;
+}
+
+
 @media (max-width: 800px) {
+  .miniContainerInfo {
+    align-items: start;
+    gap: 20px;
+    flex-direction: column;
+  }
+  .counter {
+    align-self: end;
+  }
+  .list {
+    width: 100%;
+  }
+  .item {
+    width: 150px;
+  }
+  .draggablezoneContainer {
+    width: 150px;
+  }
   .draggablezone {
-    width: 72px;
-    height: 72px;
+    width: 120px;
+    height: 120px;
   }
   .info {
     width: 80%;
+  }
+  .drawing {
+    width: 90%;
+  }
+  .modalMessage {
+    font-size: 30px;
+  }
+  .recipeName {
+    font-size: 36px;
+  }
+  .recipeDescription {
+    font-size: 24px;
+  }
+  .modalButton {
+    font-size: 24px;
   }
 }
 
 @media (max-width: 500px) {
   .miniContainerInfo {
     font-size: 18px;
+  }
+  .counter {
+    align-self: start;
+  }
+  .modalMessage {
+    font-size: 24px;
+  }
+  .recipeName {
+    font-size: 30px;
+  }
+  .recipeDescription {
+    font-size: 20px;
+  }
+  .modalButton {
+    font-size: 20px;
+  }
+  .headerRes {
+    font-size: 26px;
+  }
+
+  .containerRes {
+    font-size: 20px;
+  }
+}
+
+
+@media (max-width: 380px) {
+  .item {
+    width: 120px;
+  }
+
+  .draggablezoneContainer {
+    width: 120px;
+  }
+
+  .draggablezone {
+    width: 100px;
+    height: 100px;
   }
 }

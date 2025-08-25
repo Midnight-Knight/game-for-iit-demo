@@ -1,3 +1,8 @@
+.element {
+    justify-self: center;
+    align-items: center;
+}
+
 .delete {
     font-size: 16px;
     padding: 0 !important;
@@ -20,7 +25,9 @@
 .dropzone {
     position: relative;
     display: flex;
+    gap: 8px;
     justify-content: center;
+    margin: auto;
     align-items: center;
     width: 150px;
     height: 150px;
@@ -29,9 +36,59 @@
     border-radius: 50%;
 }
 
+.image {
+    width: 120px;
+    height: 120px;
+}
+
+.name {
+    text-align: center;
+}
+
+.floating {
+    background: #fff;
+    color: #000;
+    border: 3px solid #aaa;
+    padding: 1px 10px;
+    border-radius: 15px;
+    z-index: 9999;
+    max-width: 240px;
+    text-align: center;
+}
+
 @media (max-width: 800px) {
+    .delete {
+        font-size: 14px;
+    }
     .dropzone {
-        width: 72px;
-        height: 72px;
+        width: 120px;
+        height: 120px;
+    }
+    .name {
+        font-size: 20px;
+    }
+    .image {
+        width: 100px;
+        height: 100px;
+    }
+    .floating {
+        font-size: 18px;
+    }
+}
+
+@media (max-width: 380px) {
+    .delete {
+        font-size: 10px;
+    }
+    .dropzone {
+        width: 100px;
+        height: 100px;
+    }
+    .name {
+        font-size: 18px;
+    }
+    .image {
+        width: 80px;
+        height: 80px;
     }
 }

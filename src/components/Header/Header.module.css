@@ -3,7 +3,7 @@
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    padding-bottom: 150px;
+    padding-bottom: 80px;
 }
 
 .title {
@@ -11,7 +11,7 @@
 }
 
 .logo {
-    width: 100px;
+    width: 128px;
     height: auto;
     border-radius: 20px;
 }
@@ -20,7 +20,19 @@
     .title {
         font-size: 24px;
     }
+    .header {
+        padding-bottom: 80px;
+    }
+}
+
+@media (max-width: 440px) {
+    .title {
+        font-size: 24px;
+    }
     .logo {
-        width: 64px;
+        width: 76px;
+    }
+    .header {
+        padding-bottom: 40px;
     }
 }

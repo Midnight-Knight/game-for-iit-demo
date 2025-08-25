@@ -3,19 +3,15 @@ import { useState, useEffect } from "react";
 import { RESULTS } from "./configs/results.config";
 import type { Elements } from "./types/results.types";
 import Draggable from "./components/DraggableItem/DraggableItem";
-import Slider from "./components/Slider/Slider";
 import Modal from "./components/Modals/Modal.tsx";
 import Header from "./components/Header/Header.tsx";
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "./configs/messages.config.ts";
-import Stopwatch from "./components/Stopwatch/Stopwatch.tsx";
 import { motion, AnimatePresence } from "framer-motion";
-import { calculateScore } from "./utils/calculateScore";
 import { randomMessage } from "./utils/randomMessage.ts";
 import { mix } from "./utils/mix.ts";
-import { getVisibleCount } from "./utils/getVisibleCount.ts";
-import ModalFinal from "./components/Modals/ModalFinal/ModalFinal.tsx";
 import Gears from "./components/Gears/Gears.tsx";
 import DropzoneSlider from "./components/DropzoneLayout/DropzoneLayout.tsx";
+import DEFAULT_CHERTEZH from "/default_chertezh.jpg";
 
 type Recipe = {
     id: number;
@@ -42,15 +38,12 @@ function App() {
     const [droppedByZone, setDroppedByZone] = useState<Record<number, Elements | null>>({});
     const [result, setResult] = useState<{ isSuccess?: boolean } & Record<number, boolean>>({});
     const [isOpen, setIsOpen] = useState<boolean>(false);
-    const [stopTime, setStopTime] = useState(false);
-    const [scorePerStep, setScorePerStep] = useState<number[]>([]);
     const [isResultModalOpen, setIsResultModalOpen] = useState(false);
-    const [startTime, setStartTime] = useState<number>(Date.now());
     const [initialShuffled, setInitialShuffled] = useState<Elements[]>([]);
-
+    const [countTrue, setCountTrue] = useState<string>("");
+    const [countFalse, setCountFalse] = useState<string>("");
     const [availableRecipes, setAvailableRecipes] = useState<typeof RESULTS>([]);
     const [completedRecipesIds, setCompletedRecipesIds] = useState<number[]>([]);
-    const [visibleCount, setVisibleCount] = useState(getVisibleCount());
 
     function canUnlockRecipe(
         recipe: Recipe,
@@ -103,16 +96,27 @@ function App() {
             setDragItems(shuffledElements);
             setDroppedByZone({});
             setResult({});
-            setStartTime(Date.now());
-            setStopTime(false);
         }
     }, [recipe]);
 
     useEffect(() => {
-        const handleResize = () => setVisibleCount(getVisibleCount());
-        window.addEventListener("resize", handleResize);
-        return () => window.removeEventListener("resize", handleResize);
+        function handleTouchMove(e: TouchEvent) {
+            if (!e.target) return;
+            const margin = 80;
+            const y = e.touches[0].clientY;
+
+            if (y < margin) {
+                window.scrollBy({ top: -30, behavior: 'smooth' });
+            } else if (y > window.innerHeight - margin) {
+                window.scrollBy({ top: 30, behavior: 'smooth' });
+            }
+        }
+
+        window.addEventListener('touchmove', handleTouchMove, { passive: false });
+
+        return () => window.removeEventListener('touchmove', handleTouchMove);
     }, []);
+
 
 
 
@@ -143,9 +147,6 @@ function App() {
     };
 
     const check = () => {
-        const elapsedTime = Date.now() - startTime;
-        setStopTime(true);
-
         setPlay(true);
 
         setTimeout(() => {
@@ -159,9 +160,6 @@ function App() {
             setIsOpen(true);
 
             if (allCorrectPresent) {
-                const score = calculateScore(recipe.points!, elapsedTime);
-                setScorePerStep(prev => [...prev, score]);
-
                 setCompletedRecipesIds(prev =>
                     prev.includes(recipe.id) ? prev : [...prev, recipe.id]
                 );
@@ -171,11 +169,15 @@ function App() {
         }, 3000);
     };
 
+    const resetDropzone = () => {
+        setDroppedByZone({});
+        setDragItems(initialShuffled);
+        setResult({});
+        setIsOpen(false);
+    };
 
     const nextRecipe = () => {
-        setStopTime(false);
         setIsOpen(false);
-        setStartTime(Date.now());
 
         if (stepIndex + 1 < availableRecipes.length) setStepIndex(stepIndex + 1);
         else setIsResultModalOpen(true);
@@ -184,88 +186,122 @@ function App() {
     if (!recipe) return <div>Нет доступных рецептов</div>;
 
     return (
-        <div className={s.app}>
+        <>
             <Header />
-
-            <div className={s.containerInfo}>
-                <div className={s.miniContainerInfo}>
-                    <p className={s.info}>Подбери {correctElements.length} правильных компонента и запусти создание</p>
-                    <div className={s.time}>
-                        <Stopwatch stopTime={stopTime} onStop={() => {}} />
+            <div className={s.app}>
+                <div className={s.containerInfo}>
+                    <div className={s.miniContainerInfo}>
+                        <p className={s.info}>Подбери {correctElements.length} правильных компонента и запусти создание изобретения</p>
+                        <div className={s.counter}>
+                            <p>Успешных попыток:{countTrue}</p>
+                            <p>Неудачных попыток:{countFalse}</p>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <DropzoneSlider
-                correctElements={correctElements}
-                droppedByZone={droppedByZone}
-                onDrop={handleDrop}
-                onClear={clearDropzone}
-                drawing={recipe.drawing}
-                visibleCount={3}
-            />
+                <DropzoneSlider
+                    correctElements={correctElements}
+                    droppedByZone={droppedByZone}
+                    onDrop={handleDrop}
+                    onClear={clearDropzone}
+                />
 
-            <Slider
-                items={dragItems}
-                visibleCount={visibleCount}
-                renderItem={(el) => el ? <Draggable element={el} /> : <div className={s.draggablezone}></div>}
-            />
+                <img src={DEFAULT_CHERTEZH} alt={"CHERTEZH"} className={s.drawing} />
 
-            <motion.button
-                className={s.checkButton}
-                onClick={check}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                disabled={Object.keys(droppedByZone).length !== correctElements.length}
-            >
-                Проверка
-            </motion.button>
+                <div className={s.list}>
+                    {dragItems.map((el, i) => (
+                        <div
+                            key={el ? el.id : `empty-${i}`}
+                            className={s.item}
+                        >
+                            {el ? (
+                                <Draggable element={el} />
+                            ) : (
+                                <div className={s.draggablezoneContainer}>
+                                    <div className={s.draggablezone}></div>
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                </div>
 
-            <AnimatePresence>
-                {result.isSuccess !== undefined && isOpen && (
-                    <Modal onClose={() => setIsOpen(false)}>
-                        <motion.div initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 50 }} transition={{ duration: 0.3 }}>
-                            <div className={s.modalInfo}>
-                                <h2>{result.isSuccess ? randomMessage(successMessages) : randomMessage(errorMessages)}</h2>
 
-                                {result.isSuccess && (
-                                    <>
-                                        <motion.div className={s.modalInfoRecipe} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-                                            <p className={s.recipeName}>{recipe.name}</p>
-                                            <p>{recipe.description}</p>
-                                        </motion.div>
-                                        <img src={recipe.image} alt={recipe.name} className={s.modalImage} />
-                                    </>
-                                )}
+                <motion.button
+                    className={s.checkButton}
+                    onClick={check}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    disabled={Object.keys(droppedByZone).length !== correctElements.length}
+                >
+                    Старт эксперимента
+                </motion.button>
 
-                                <motion.button
-                                    onClick={() => {
-                                        if (result.isSuccess) nextRecipe();
-                                    }}
-                                    className={s.modalButton}
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    disabled={!result.isSuccess}
-                                >
-                                    {stepIndex + 1 < availableRecipes.length ? "Попытаться ещё раз" : "Результат"}
-                                </motion.button>
+                <AnimatePresence>
+                    {result.isSuccess !== undefined && isOpen && (
+                        <Modal>
+                            <div>
+                                <div className={s.modalInfo}>
+                                    <h2 className={s.modalMessage}>{result.isSuccess ? randomMessage(successMessages) : randomMessage(errorMessages)}</h2>
 
+                                    {result.isSuccess && (
+                                        <>
+                                            <motion.div className={s.modalInfoRecipe} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+                                                <p className={s.recipeName}>{recipe.name}</p>
+                                                <p className={s.recipeDescription}>- {recipe.description}</p>
+                                            </motion.div>
+                                            <img src={recipe.image} alt={recipe.name} className={s.modalImage} />
+                                        </>
+                                    )}
+
+                                    <motion.button
+                                        onClick={() => {
+                                            if (result.isSuccess) {
+                                                setCountTrue(prev => prev + " ✅");
+                                                nextRecipe();
+                                            } else {
+                                                setCountFalse(prev => prev + " ❌");
+                                                resetDropzone();
+                                            }
+                                        }}
+                                        className={s.modalButton}
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                    >
+                                        {stepIndex + 1 >= availableRecipes.length
+                                            ? "Результат"
+                                            : result.isSuccess
+                                                ? "Продолжить изобретать"
+                                                : "Попытаться ещё раз"}
+                                    </motion.button>
+                                </div>
                             </div>
-                        </motion.div>
-                    </Modal>
-                )}
-            </AnimatePresence>
+                        </Modal>
+                    )}
+                </AnimatePresence>
 
-            <AnimatePresence>
-                {isResultModalOpen && (
-                    <Modal onClose={() => setIsOpen(true)}>
-                        <ModalFinal totalScore={scorePerStep} />
-                    </Modal>
-                )}
-            </AnimatePresence>
+                <AnimatePresence>
+                    {isResultModalOpen && (
+                        <Modal>
+                            <h2 className={s.headerRes}>Результат🏆</h2>
+                            <div className={s.containerRes}>
+                                <p>Успешных попыток: {countTrue}</p>
+                                <p>Неудачных попыток: {countFalse}</p>
+                            </div>
+                            <motion.button
+                                onClick={() => window.location.reload()}
+                                className={s.modalButton}
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                            >
+                                Заново
+                            </motion.button>
+                        </Modal>
+                    )}
+                </AnimatePresence>
 
-            <Gears play={play} />
-        </div>
+                <Gears play={play} />
+            </div>
+        </>
     );
 }
 
