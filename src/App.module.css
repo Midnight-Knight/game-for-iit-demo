@@ -2,12 +2,12 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 40px;
+  gap: 20px;
   padding-bottom: 60px;
 }
 
 .drawing {
-  width: 600px;
+  width: 400px;
   height: auto;
   border-radius: 50px;
 }
@@ -43,7 +43,7 @@
 .info {
   font-weight: bold;
   width: 60%;
-  max-width: 400px;
+  max-width: 300px;
 }
 
 .draggablezoneContainer {
@@ -55,8 +55,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 150px;
-  height: 150px;
+  width: 120px;
+  height: 120px;
   background: #ffffff;
   background: radial-gradient(circle, rgba(255, 255, 255, 1) 0%, rgba(182, 217, 252, 1) 100%);
   opacity: 0.7;
@@ -135,7 +135,7 @@
   border-radius: 20px;
   font-weight: bold;
   background: #9f9f9f;
-  width: 80%;
+  width: 60%;
 }
 
 .headerRes {
@@ -151,8 +151,45 @@
   padding-bottom: 24px;
 }
 
+.headerAchiv {
+  margin: 0;
+  text-align: center;
+  padding-bottom: 20px;
+}
+
+.containerAchiv {
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 120px);
+  gap: 10px;
+}
+
+.nameAchiv {
+  font-size: 16px;
+  text-align: center;
+}
+
+.imageAchiv {
+  width: 100%;
+  border-radius: 16px;
+}
+
+.floating {
+  background: #fff;
+  color: #000;
+  border: 3px solid #aaa;
+  padding: 1px 10px;
+  border-radius: 15px;
+  z-index: 9999;
+  max-width: 240px;
+  text-align: center;
+  font-size: 18px;
+}
 
 @media (max-width: 800px) {
+  .containerAchiv {
+    grid-template-columns: repeat(2, 120px);
+  }
   .miniContainerInfo {
     align-items: start;
     gap: 20px;
@@ -192,6 +229,9 @@
   .modalButton {
     font-size: 24px;
   }
+  .floating {
+    font-size: 16px;
+  }
 }
 
 @media (max-width: 500px) {
@@ -224,6 +264,10 @@
 
 
 @media (max-width: 380px) {
+  .containerAchiv {
+    grid-template-columns: repeat(1, 180px);
+  }
+
   .item {
     width: 120px;
   }

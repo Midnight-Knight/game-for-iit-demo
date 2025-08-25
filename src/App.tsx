@@ -1,7 +1,7 @@
 import s from './App.module.css';
 import { useState, useEffect } from "react";
 import { RESULTS } from "./configs/results.config";
-import type { Elements } from "./types/results.types";
+import type { Elements, Results } from "./types/results.types";
 import Draggable from "./components/DraggableItem/DraggableItem";
 import Modal from "./components/Modals/Modal.tsx";
 import Header from "./components/Header/Header.tsx";
@@ -12,20 +12,17 @@ import { mix } from "./utils/mix.ts";
 import Gears from "./components/Gears/Gears.tsx";
 import DropzoneSlider from "./components/DropzoneLayout/DropzoneLayout.tsx";
 import DEFAULT_CHERTEZH from "/default_chertezh.jpg";
+import {
+    flip,
+    offset,
+    shift,
+    useFloating,
+    useHover,
+    useInteractions,
+    useRole
+} from "@floating-ui/react-dom-interactions";
 
-type Recipe = {
-    id: number;
-    level: number;
-    class: number[];
-    points: number;
-    name: string;
-    description: string;
-    image: string;
-    drawing: string;
-    elements: Elements[];
-    dependsOn: number[];
-    completed: boolean;
-};
+type Recipe = Results;
 
 
 function App() {
@@ -44,6 +41,43 @@ function App() {
     const [countFalse, setCountFalse] = useState<string>("");
     const [availableRecipes, setAvailableRecipes] = useState<typeof RESULTS>([]);
     const [completedRecipesIds, setCompletedRecipesIds] = useState<number[]>([]);
+    const [discoveredRecipes, setDiscoveredRecipes] = useState<Recipe[]>([]);
+    const [isDiscoveredModalOpen, setIsDiscoveredModalOpen] = useState(false);
+
+    function DiscoveredItem({ recipe }: { recipe: Recipe }) {
+        const [open, setOpen] = useState(false);
+        const { x, y, reference, floating, strategy, context } = useFloating({
+            placement: "top",
+            open,
+            onOpenChange: setOpen,
+            middleware: [offset(15), flip(), shift()],
+        });
+
+        const hover = useHover(context);
+        const role = useRole(context, { role: "tooltip" });
+        const interactions = useInteractions([hover, role]);
+
+        return (
+            <div>
+                <div ref={reference} {...interactions.getReferenceProps()} className={s.discoveredItem}>
+                    <img src={recipe.image} alt={recipe.name} className={s.imageAchiv} />
+                    <p className={s.nameAchiv}>{recipe.name}</p>
+                </div>
+
+                {open && (
+                    <div
+                        ref={floating}
+                        {...interactions.getFloatingProps()}
+                        style={{ position: strategy, top: y ?? 0, left: x ?? 0, zIndex: 999 }}
+                        className={s.floating}
+                    >
+                        {recipe.description}
+                    </div>
+                )}
+            </div>
+        );
+    }
+
 
     function canUnlockRecipe(
         recipe: Recipe,
@@ -187,24 +221,24 @@ function App() {
 
     return (
         <>
-            <Header />
+            <Header onOpenDiscovered={() => setIsDiscoveredModalOpen(true)} />
+
             <div className={s.app}>
                 <div className={s.containerInfo}>
                     <div className={s.miniContainerInfo}>
                         <p className={s.info}>Подбери {correctElements.length} правильных компонента и запусти создание изобретения</p>
+                        <DropzoneSlider
+                            correctElements={correctElements}
+                            droppedByZone={droppedByZone}
+                            onDrop={handleDrop}
+                            onClear={clearDropzone}
+                        />
                         <div className={s.counter}>
                             <p>Успешных попыток:{countTrue}</p>
                             <p>Неудачных попыток:{countFalse}</p>
                         </div>
                     </div>
                 </div>
-
-                <DropzoneSlider
-                    correctElements={correctElements}
-                    droppedByZone={droppedByZone}
-                    onDrop={handleDrop}
-                    onClear={clearDropzone}
-                />
 
                 <img src={DEFAULT_CHERTEZH} alt={"CHERTEZH"} className={s.drawing} />
 
@@ -257,6 +291,7 @@ function App() {
                                         onClick={() => {
                                             if (result.isSuccess) {
                                                 setCountTrue(prev => prev + " ✅");
+                                                setDiscoveredRecipes(prev => [...prev, recipe]);
                                                 nextRecipe();
                                             } else {
                                                 setCountFalse(prev => prev + " ❌");
@@ -295,6 +330,34 @@ function App() {
                             >
                                 Заново
                             </motion.button>
+                        </Modal>
+                    )}
+                </AnimatePresence>
+
+                <AnimatePresence>
+                    {isDiscoveredModalOpen && (
+                        <Modal>
+                            <div className={s.modalInfo}>
+                                <h2 className={s.headerAchiv}>Открытые изобретения</h2>
+                                {discoveredRecipes.length > 0 ? (
+                                        <div className={s.containerAchiv}>
+                                            {discoveredRecipes.map(r => <DiscoveredItem key={r.id} recipe={r} />)}
+                                        </div>
+                                ) : (
+                                    <div>
+                                        <p style={{textAlign: "center"}}>Пока ничего не открыто</p>
+                                    </div>
+                                )}
+
+                                <motion.button
+                                    onClick={() => setIsDiscoveredModalOpen(false)}
+                                    className={s.modalButton}
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                >
+                                    Закрыть
+                                </motion.button>
+                            </div>
                         </Modal>
                     )}
                 </AnimatePresence>

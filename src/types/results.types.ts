@@ -15,8 +15,7 @@ export type Results = {
     name: string;
     description: string;
     image: string;
-    drawing: string;
-    elements: Element[];
+    elements: Elements[];
     dependsOn: number[];
     completed: boolean;
 };

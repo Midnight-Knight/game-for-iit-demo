@@ -3,11 +3,21 @@
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    padding-bottom: 80px;
+    max-height: 120px;
+}
+
+.right {
+    display: flex;
+    gap: 20px;
+    align-items: center;
 }
 
 .title {
     font-size: 32px;
+}
+
+.achievement {
+    width: 72px;
 }
 
 .logo {
@@ -20,9 +30,6 @@
     .title {
         font-size: 24px;
     }
-    .header {
-        padding-bottom: 80px;
-    }
 }
 
 @media (max-width: 440px) {
@@ -31,8 +38,5 @@
     }
     .logo {
         width: 76px;
-    }
-    .header {
-        padding-bottom: 40px;
     }
 }
