@@ -6,9 +6,10 @@ import s from "./DraggableItem.module.css";
 
 type DraggableProps = {
     element: Elements;
+    onDoubleClickDrop: (element: Elements) => void;
 };
 
-export default function Draggable({ element }: DraggableProps) {
+export default function Draggable({ element, onDoubleClickDrop }: DraggableProps) {
     const [{ isDragging }, dragRef] = useDrag({
         type: "element",
         item: element,
@@ -41,6 +42,7 @@ export default function Draggable({ element }: DraggableProps) {
                 style={{
                     opacity: isDragging ? 0.5 : 1,
                 }}
+                onDoubleClick={() => onDoubleClickDrop(element)}
             >
                 <div className={s.background}>
                     <img

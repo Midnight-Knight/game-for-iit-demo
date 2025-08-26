@@ -124,6 +124,13 @@ function App() {
     const recipe = availableRecipes[stepIndex];
     const correctElements = recipe?.elements.filter(el => el.isCorrect) || [];
 
+    const handleDoubleClickDrop = (item: Elements) => {
+        const freeZone = correctElements.find(el => !droppedByZone[el.id]);
+        if (!freeZone) return;
+
+        handleDrop(freeZone.id, item);
+    };
+
     useEffect(() => {
         if (recipe) {
             const shuffledElements = mix(recipe.elements);
@@ -300,12 +307,9 @@ function App() {
 
                 <div className={s.list}>
                     {dragItems.map((el, i) => (
-                        <div
-                            key={el ? el.id : `empty-${i}`}
-                            className={s.item}
-                        >
+                        <div key={el ? el.id : `empty-${i}`} className={s.item}>
                             {el ? (
-                                <Draggable element={el} />
+                                <Draggable element={el} onDoubleClickDrop={handleDoubleClickDrop} />
                             ) : (
                                 <div className={s.draggablezoneContainer}>
                                     <div className={s.draggablezone}></div>
@@ -375,8 +379,10 @@ function App() {
                         <Modal>
                             <h2 className={s.headerRes}>Результат🏆</h2>
                             <div className={s.containerRes}>
-                                <p>Успешных попыток: {countTrue}</p>
-                                <p>Неудачных попыток: {countFalse}</p>
+                                <p>Успешных попыток:</p>
+                                <p>{countTrue}</p>
+                                <p>Неудачных попыток:</p>
+                                <p>{countFalse}</p>
                             </div>
                             <motion.button
                                 onClick={() => window.location.reload()}
