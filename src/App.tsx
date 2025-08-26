@@ -135,24 +135,53 @@ function App() {
     }, [recipe]);
 
     useEffect(() => {
+        let scrollFrame: number | null = null;
+
         function handleTouchMove(e: TouchEvent) {
             if (!e.target) return;
             const margin = 80;
             const y = e.touches[0].clientY;
 
+            let speed = 0;
+
             if (y < margin) {
-                window.scrollBy({ top: -30, behavior: 'smooth' });
+                speed = -((margin - y) / margin) * 15;
             } else if (y > window.innerHeight - margin) {
-                window.scrollBy({ top: 30, behavior: 'smooth' });
+                speed = ((y - (window.innerHeight - margin)) / margin) * 15;
+            }
+
+            if (scrollFrame === null && speed !== 0) {
+                const step = () => {
+                    window.scrollBy(0, speed);
+                    scrollFrame = requestAnimationFrame(step);
+                };
+                scrollFrame = requestAnimationFrame(step);
+            }
+
+            if (speed === 0 && scrollFrame !== null) {
+                cancelAnimationFrame(scrollFrame);
+                scrollFrame = null;
             }
         }
 
-        window.addEventListener('touchmove', handleTouchMove, { passive: false });
+        function handleTouchEnd() {
+            if (scrollFrame !== null) {
+                cancelAnimationFrame(scrollFrame);
+                scrollFrame = null;
+            }
+        }
 
-        return () => window.removeEventListener('touchmove', handleTouchMove);
+        window.addEventListener("touchmove", handleTouchMove, { passive: false });
+        window.addEventListener("touchend", handleTouchEnd);
+        window.addEventListener("touchcancel", handleTouchEnd);
+
+        return () => {
+            window.removeEventListener("touchmove", handleTouchMove);
+            window.removeEventListener("touchend", handleTouchEnd);
+            window.removeEventListener("touchcancel", handleTouchEnd);
+            if (scrollFrame !== null) cancelAnimationFrame(scrollFrame);
+        };
     }, []);
-
-
 
 
     const handleDrop = (zoneId: number, item: Elements) => {
