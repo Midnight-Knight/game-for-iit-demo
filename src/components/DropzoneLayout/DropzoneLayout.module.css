@@ -31,11 +31,11 @@
     justify-content: center;
     align-content: center;
     gap: 20px;
-    min-height: 220px;
+    min-height: 200px;
 }
 
 .item {
-    width: 200px;
+    width: 180px;
     margin: 0;
     justify-content: center;
     justify-self: center;

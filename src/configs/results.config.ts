@@ -280,7 +280,7 @@ export const RESULTS = [
         points: 10,
         name: "Шестеренный насос",
         description: "машина, преобразующая механическую энергию вращения шестерней в энергию потока жидкости",
-        image: "/elements/Шестеренный насос.jpg",
+        image: "/elements/шестеренный насос.jpg",
         elements: [
             { id: 1, name: "Зубчатое колесо", description: "изделие в форме цилиндра или конуса с продольными выступами", image: "elements/зубчатое колесо.png", isCorrect: true, rounding: true },
             { id: 2, name: "Труба", description: "герметичный полый цилиндр, предназначенный для транспортирования жидкостей и газов", image: "/elements/Труба.png", isCorrect: true, rounding: true },
@@ -320,7 +320,7 @@ export const RESULTS = [
         elements: [
             { id: 1, name: "Архимедов винт", description: "спиралевидный винт, который можно представить, как наклонную плоскость, навёрнутую на цилиндр", image: "/elements/Архимедов винт.jpeg", isCorrect: true, rounding: true },
             { id: 2, name: "Труба", description: "герметичный полый цилиндр, предназначенный для транспортирования жидкостей и газов", image: "/elements/Труба.png", isCorrect: true, rounding: true },
-            { id: 3, name: "Верёвка", description: "скрученные волокна, используемые для связывания", image: "/elements/верёвка.jpg", isCorrect: false, rounding: true },
+            { id: 3, name: "Верёвка", description: "скрученные волокна, используемые для связывания", image: "/elements/веревка.jpg", isCorrect: false, rounding: true },
             { id: 4, name: "Вода", description: "природный элемент", image: "/elements/вода.jpg", isCorrect: false, rounding: true },
         ],
         dependsOn: [],

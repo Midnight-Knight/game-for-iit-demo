@@ -77,7 +77,6 @@ export default function Dropzone({ dropped, onDrop, onClear }: DropzoneProps) {
                         </>
                     ) : null}
                 </motion.div>
-                <p className={s.name}>{dropped?.name}</p>
             </div>
             {open && dropped && (
                 <div
@@ -90,7 +89,7 @@ export default function Dropzone({ dropped, onDrop, onClear }: DropzoneProps) {
                     className={s.floating}
                     {...interactions.getFloatingProps()}
                 >
-                    {dropped.description}
+                    {dropped.name} - {dropped.description}
                 </div>
             )}
         </>

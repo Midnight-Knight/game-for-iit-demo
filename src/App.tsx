@@ -218,7 +218,16 @@ function App() {
         else setIsResultModalOpen(true);
     };
 
-    if (!recipe) return <div>Нет доступных рецептов</div>;
+    if (!recipe) {
+        return (
+            <div className={s.noRecipe}>
+                <div className={s.loader}></div>
+                <p>Ищем рецепт...</p>
+            </div>
+        );
+    }
+
+
 
     return (
         <>
